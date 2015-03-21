@@ -1,0 +1,16 @@
+
+./causation -tevdata=<TeV Data> -xraydata=<X-ray Data> -trials=<Number default=1000> -window=<Time window in days> -output=<output root file>
+
+Data file should be of the format
+
+MJD, Flux, Error on the Flux
+
+eg
+
+56317.275186 8.060120 5.138459
+56323.214040 9.374237 2.697639
+56324.257859 8.270325 3.812431
+56325.256239 10.058402 4.328447
+
+
+./causation -tevdata=Mrk421_FACT_LP.dat -xraydata=Mrk421_xrt_wt.dat -trials=100000 -window=1. -output=temp.root
