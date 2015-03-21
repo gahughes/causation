@@ -1,23 +1,3 @@
-# Makefile for causation
-#
-#  shell variables needed:
-#    ROOTSYS (pointing to root installation)
-#
-#  for using GSL libraries 
-#    GSLSYS  (pointing to GSL installation)
-#    or
-#    gsl-config exists
-#
-#  for using FITS
-#    FITSSYS (pointing to FITS installation)
-#
-#  for using HESSIO
-#    HESSIOSYS (pointing to HESSIO installation)
-#
-# Revision $Id: Makefile,v 1.1.2.2 2011/04/21 10:48:39 gmaier Exp $
-#
-# Gernot Maier 
-#
 SHELL = /bin/sh
 ARCH  = $(shell uname)
 ARCHP = $(shell uname -m)
