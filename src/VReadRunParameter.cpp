@@ -9,6 +9,7 @@ VReadRunParameter::VReadRunParameter()
 
 }
 
+// Read the command line args
 bool VReadRunParameter::readCommandline( int argc, char *argv[] )
 {
 
@@ -82,6 +83,7 @@ bool VReadRunParameter::readCommandline( int argc, char *argv[] )
    return true;
 
 }
+
 void VReadRunParameter::printHelp()
 {
 
@@ -114,6 +116,8 @@ void VReadRunParameter::printStartMessage()
 
 }
 
+
+// Read the XRay data
 void VReadRunParameter::readXRayData( string fInfile )
 {
 
@@ -163,6 +167,8 @@ void VReadRunParameter::readXRayData( string fInfile )
   fRunPara->fXRayFluxError = eflux;
 
 }
+
+// Read the TeV Data
 void VReadRunParameter::readTeVData( string fInfile )
 {
 
@@ -212,5 +218,3 @@ void VReadRunParameter::readTeVData( string fInfile )
   fRunPara->fTeVFluxError = eflux;
 
 }
-
-

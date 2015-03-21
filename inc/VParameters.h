@@ -31,12 +31,14 @@ class VParameters
 	void print();
 	void initialise();
 
+// Input Filenames
         string sOutPutFileName;
         string fTeVDataFile;
         string fXRayDataFile;
 	int    iNumberOfTrials;
 	float  fTimeWindow;
 
+// Parameters read from LCs
         vector<double> fTeVDate;
         vector<double> fTeVeDate;
         vector<double> fTeVFlux;

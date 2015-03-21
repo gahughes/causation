@@ -3,7 +3,6 @@
 
 // PARAMTERS HERE
 
-
 VGlobalRunParameter::VGlobalRunParameter()
 {
 

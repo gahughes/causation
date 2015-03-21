@@ -18,24 +18,26 @@
 
 class VReadRunParameter 
 {
+
     private:
         bool fDebug;
-        void printHelp();                         //!< print a short help
+        void printHelp();               //!< print a short help
 	
-	VParameters *fRunPara;
+	VParameters *fRunPara;		// The run parameters
         TRandom3 *fRandom;
 
     public:
         VReadRunParameter();
         ~VReadRunParameter() {}
 
-	VParameters* getRunParameter()
-	{
-	  return fRunPara;
-	}
+	// Returns the run parameters
+	VParameters* getRunParameter() { return fRunPara; }
 
+	// Read the command line args
         bool readCommandline( int argc, char *arg[] );
+	// Just a pretty picture
 	void printStartMessage();
+	// Read in the light curves
 	void readTeVData(string a);
 	void readXRayData(string a);
 

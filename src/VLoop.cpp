@@ -4,11 +4,14 @@
 VLoop::VLoop( VParameters *irunpara  )
 {
 
+  // Run Parameters
   fRunPara = irunpara;
 
+  // Randoms
   int seed = time(NULL)*getpid();
   rand = new TRandom3(seed);
 
+  // Outout root file
   fOutPutFile = new TFile(fRunPara->sOutPutFileName.c_str(),"RECREATE");
 
 }
@@ -16,20 +19,24 @@ VLoop::VLoop( VParameters *irunpara  )
 void VLoop::loop()
 {
 
+   // Cxy and Cyx from Algo 3
    double C_tev_xray = 0.;
    double C_xray_tev = 0.;
 
+   // The square of the above
    double C_tev_xray2 = 0.;
    double C_xray_tev2 = 0.;
 
-
+   // Double vector of ints representing the matched values from each light curve
    vector< vector<int> > iMatched = matchDates( fRunPara->fXRayDate, fRunPara->fTeVDate );
 
+   // Data and error vectors
    vector<double> fTeVData;
    vector<double> fTeVError;
    vector<double> fXRayData;
    vector<double> fXRayError;
 
+   // Add the correct matched values from the LCs
    for( unsigned int i = 0; i < iMatched.size(); i++ )
    {
 
@@ -41,6 +48,9 @@ void VLoop::loop()
 
    }
 
+// Create the output graphs
+
+//  Correllated plots
   Int_t iMatch = iMatched.size();
   gCorrelation = new TGraphErrors(iMatch,&fTeVData[0],&fXRayData[0],&fTeVError[0],&fXRayError[0]);
   gCorrelation->SetTitle("");
@@ -49,6 +59,7 @@ void VLoop::loop()
   gCorrelation->SetName("gCorrelation");
   gCorrelation->Write();
 
+// TeV LC
   Int_t iTeVLC = fRunPara->fTeVDate.size();
   gTeVLC = new TGraphErrors(iTeVLC,&fRunPara->fTeVDate[0],&fRunPara->fTeVFlux[0],&fRunPara->fTeVeDate[0],&fRunPara->fTeVFluxError[0]);
   gTeVLC->SetTitle("");
@@ -57,6 +68,7 @@ void VLoop::loop()
   gTeVLC->SetName("gTeVLC");
   gTeVLC->Write();
 
+// X-Ray LC
   Int_t iXRayLC = fRunPara->fXRayDate.size();
   gXrayLC = new TGraphErrors(iXRayLC,&fRunPara->fXRayDate[0],&fRunPara->fXRayFlux[0],&fRunPara->fXRayeDate[0],&fRunPara->fXRayFluxError[0]);
   gXrayLC->SetTitle("");
@@ -65,34 +77,43 @@ void VLoop::loop()
   gXrayLC->SetName("gXrayLC");
   gXrayLC->Write();
 
+// Close the output file
   fOutPutFile->Close();
 
   for( int k = 0; k < fRunPara->iNumberOfTrials; k++ )
   {
 
+// Create the Randomized data from the matched sets
     vector<double> randomTeV  = randomData( fTeVData, fTeVError);  
     vector<double> randomXRay = randomData( fXRayData, fXRayError);  
 
+// Normalize these data to gaussian with width 1
     vector<double> normalTeV  = normalizeData( randomTeV );
     vector<double> normalXRay = normalizeData( randomXRay );
 
+// Calculate from algo 3
     double temp1 = runMooij( normalTeV, normalXRay );
     double temp2 = runMooij( normalXRay, normalTeV );
 
+// Add up the answers
     C_tev_xray += temp1;
     C_xray_tev += temp2;
 
+// Add up the squares
     C_tev_xray2 += temp1*temp1;
     C_xray_tev2 += temp2*temp2;
 
   }
 
+// Calc the average
   double C_tev_xray_mean = C_tev_xray/fRunPara->iNumberOfTrials;
   double C_tev_xray_error = sqrt(C_tev_xray2/fRunPara->iNumberOfTrials-(C_tev_xray/fRunPara->iNumberOfTrials)*(C_tev_xray/fRunPara->iNumberOfTrials));
 
+// Calc the average
   double C_xray_tev_mean = C_xray_tev/fRunPara->iNumberOfTrials;
   double C_xray_tev_error = sqrt(C_xray_tev2/fRunPara->iNumberOfTrials-(C_xray_tev/fRunPara->iNumberOfTrials)*(C_xray_tev/fRunPara->iNumberOfTrials));
 
+// Output the answer
   cout << C_tev_xray_mean << " +/- " << C_tev_xray_error << endl;
   cout << C_xray_tev_mean << " +/- " << C_xray_tev_error << endl;
 
@@ -107,6 +128,7 @@ void VLoop::loop()
 
 }
 
+// Normalize a vector to the same mean but with a 1 sigma width
 vector<double> VLoop::normalizeData( vector<double> fInVector)
 {
 
@@ -142,6 +164,8 @@ vector<double> VLoop::normalizeData( vector<double> fInVector)
 
 }
 
+// Obsolete
+/*
 vector<double> VLoop::orderData( vector<double> fInVector)
 {
 
@@ -181,7 +205,8 @@ vector<double> VLoop::orderData( vector<double> fInVector)
   return out;
 
 }
-
+*/
+// Create Random Vector from input vector and its errors
 vector<double> VLoop::randomData( vector<double> fInVector, vector<double> fInVectorError )
 {
 
@@ -203,18 +228,18 @@ vector<double> VLoop::randomData( vector<double> fInVector, vector<double> fInVe
 
 }
 
+// Do algorithum 3 from the paper
 double VLoop::runMooij( vector<double> fInX, vector<double> fInY )
 {
 
   double sum = 0.;
 
+// Check everything is ok
   if( fInX.size() != fInY.size() || fInX.size() == 0 || fInY.size() == 0 )
   {
     cout << "This is not going to work!" << endl;
     exit(-1);
   }
-
-
 
   double temp1;
   double temp2;
@@ -248,8 +273,6 @@ double VLoop::runMooij( vector<double> fInX, vector<double> fInY )
     }
   }
 
-
-
   for( unsigned int i = 0; i < fInX.size() - 1; i++ )
   {
     if( fInX[i+1] == fInX[i] ) cout << "Ek " << endl;
@@ -262,6 +285,7 @@ double VLoop::runMooij( vector<double> fInX, vector<double> fInY )
 
 }
 
+// Match the dates from the LCs
 vector< vector<int> > VLoop::matchDates( vector<double> fInX, vector<double> fInT )
 {
 

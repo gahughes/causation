@@ -38,14 +38,10 @@ class VGlobalRunParameter
 
   private:
 
-//	TTree *outTree;
-
   public:
 
 	VGlobalRunParameter();
 	~VGlobalRunParameter() {}
-
-
 
 };
 

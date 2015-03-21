@@ -28,29 +28,31 @@ class VLoop : VParameters
 
   private:
 	TRandom3 *rand;
-	VParameters *fRunPara;
-//	VGlobalRunParameter *fGlobal;
+	VParameters *fRunPara; 		// run parameters
 
-	TFile *fOutPutFile;
+	TFile *fOutPutFile; 		// output root file
 
   public:
 
 	VLoop( VParameters* );
 	virtual ~VLoop() {}
 
-	//void initialize();
-	void loop();
-	void normalizeData();
+	void loop();			// The main loop
 
+	// Function to read in light curve and make it Gaussian with a width of 1
         vector<double> normalizeData( vector<double> fInVector);
-        vector<double> orderData( vector<double> fInVector);
+	// Obsolete
+        //vector<double> orderData( vector<double> fInVector);
+	// Produce a new equally large vector of doubles based on the input and its errror
         vector<double> randomData( vector<double> fInVector, vector<double> fInVectorError );
+	// Match the two light curves within the time window
         vector<vector <int> > matchDates( vector<double> a, vector<double> b );
+	// Run algorithum 3 from the paper http://arxiv.org/abs/1412.3773
         double runMooij( vector<double> a, vector<double> b );
 
-        TGraphErrors *gCorrelation;
-        TGraphErrors *gXrayLC;
-        TGraphErrors *gTeVLC;
+        TGraphErrors *gCorrelation;	// Correlation Plot
+        TGraphErrors *gXrayLC;		// X-Ray Light Curve
+        TGraphErrors *gTeVLC;		// TeV Light Curve
 
 };
 

@@ -20,8 +20,8 @@
 
 using namespace std;
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char *argv[]) 
+{
 
    int seed = time(NULL)*getpid();
    srand(seed);
@@ -30,8 +30,10 @@ int main(int argc, char *argv[]) {
    VReadRunParameter *fReadRunParameter = new VReadRunParameter();
    if( !fReadRunParameter->readCommandline( argc, argv ) ) exit( -1 );
 
+// Get the run parameters
    fReadRunParameter->getRunParameter()->initialise();
    fReadRunParameter->getRunParameter()->print();
+// Do the reading if the light curves
    fReadRunParameter->readTeVData( fReadRunParameter->getRunParameter()->fTeVDataFile );
    fReadRunParameter->readXRayData( fReadRunParameter->getRunParameter()->fXRayDataFile );
 
