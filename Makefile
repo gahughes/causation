@@ -19,40 +19,6 @@ ROOT528=$(shell expr 5.28 \>= `root-config --version | cut -f1 -d \/`)
 ROOT_MLP=$(shell root-config --has-xml)
 ROOT_MINUIT2=$(shell root-config --has-minuit2)
 ROOT_MYSQL=$(shell root-config --has-mysql)
-#############################
-# VERITAS DATABASE 
-# (necessary for VERITAS data analysis)
-#############################
-# check that root is compiled with mysql
-DBTEST=$(shell root-config --has-mysql)
-ifeq ($(DBTEST),yes)
-  DBFLAG=-DRUNWITHDB
-endif
-#####################
-# GSL libraries
-#####################
-ifeq ($(origin GSLSYS), undefined)
-# test if gsl-config exists
-  GSLTEST=$(shell which gsl-config)
-  ifeq ($(strip $(GSLTEST)),)
-    GSLFLAG=-DNOGSL
-  endif
-endif
-#####################
-# CTA HESSIO INPUT
-#####################
-# USE HESSIO LIBRARY
-# (necessary for CTA hessio to VDST converter)
-ifeq ($(strip $(HESSIOSYS)),)
-HESSIO = FALSE
-endif
-#####################
-# FITS ROUTINES
-# (optional, necessary for root to FITS converter)
-#####################
-ifeq ($(strip $(FITSSYS)),)
-FITS = FALSE
-endif
 
 ########################################################################################################################
 # compile and linker flags
@@ -71,7 +37,6 @@ CXX           = g++
 endif
 CXXFLAGS      = -O3 -g -Wall -fPIC  -fno-strict-aliasing  -D_FILE_OFFSET_BITS=64 -D_LARGE_FILE_SOURCE -D_LARGEFILE64_SOURCE
 CXXFLAGS     += -I. -I./inc/
-CXXFLAGS     += $(VBFFLAG) $(DBFLAG) $(GSLFLAG)
 LD            = g++
 OutPutOpt     = -o
 INCLUDEFLAGS  = -I. -I./inc/
@@ -108,31 +73,6 @@ GLIBS         = $(ROOTGLIBS)
 GLIBS        += -lMLP -lTreePlayer -lMinuit -lXMLIO
 ifeq ($(ROOT_MINUIT2),yes)
    GLIBS     += -lMinuit2
-endif
-########################################################
-# GSL FLAGS
-########################################################
-ifneq ($(GSLFLAG),-DNOGSL)
-GSLCFLAGS    = $(shell gsl-config --cflags)
-GSLLIBS      = $(shell gsl-config --libs)
-GLIBS        += $(GSLLIBS)
-CXXFLAGS     += $(GSLCFLAGS)
-endif
-########################################################
-# FITS
-########################################################
-ifneq ($(FITS),FALSE)
-GLIBS		+= -L$(FITSSYS)/lib -lcfitsio
-CXXFLAGS	+= -I $(FITSSYS)/include/
-endif
-########################################################
-# HESSIO 
-########################################################
-ifneq ($(HESSIO),FALSE)
-HESSIOINCLUDEFLAGS = -I $(HESSIOSYS)/include/
-#CXXFLAGS        += $(HESSIOINCLUDEFLAGS) -DCTA_MAX
-CXXFLAGS        += $(HESSIOINCLUDEFLAGS) -DCTA -DCTA_ULTRA
-#CXXFLAGS        += $(HESSIOINCLUDEFLAGS) -DCTA_SC=2
 endif
 
 ########################################################
@@ -199,47 +139,19 @@ MODOBJECTS += ./obj/causation.o
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 causation:	$(MODOBJECTS)
-ifeq ($(GSLFLAG),-DNOGSL)
-	@echo "LINKING causation without GSL libraries"
-else
-	@echo "LINKING causation with GSL libraries"
-endif
-	@echo "LINKING causation without VBF support"
+	@echo "LINKING"
 	$(LD) $(LDFLAGS) $^ $(GLIBS) $(OutPutOpt) ./bin/$@
 
 	@echo "$@ done"
 
 
-
-########################################################
-# dictionaries (which don't follow the implicit rule)
-########################################################
-
-./obj/VDisplay_Dict.o:	
-	@echo "A Generating dictionary $@.."
-	@echo rootcint -f $(basename $@).cpp  -c -p -I./inc/ ./inc/VDisplay.h ./inc/VDisplayLinkDef.h
-	@rootcint -f $(basename $@).cpp  -c -p -I./inc/ ./inc/VDisplay.h ./inc/VDisplayLinkDef.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $(basename $@).cpp
-
-./obj/VLightCurve_Dict.o:	
-	@echo "Generating dictionary $@..."
-	@echo rootcint -f $(basename $@).cpp -c -p ./inc/VLightCurve.h ./inc/VLightCurveData.h ./inc/VLightCurveLinkDef.h
-	@rootcint -f $(basename $@).cpp -c -p ./inc/VLightCurve.h ./inc/VLightCurveData.h ./inc/VLightCurveLinkDef.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $(basename $@).cpp
-
-./obj/VZDCF_Dict.o:	
-	@echo "Generating dictionary $@..."
-	@echo rootcint -f $(basename $@).cpp -c -p ./inc/VZDCF.h ./inc/VZDCFData.h ./inc/VZDCFLinkDef.h
-	@rootcint -f $(basename $@).cpp -c -p ./inc/VZDCF.h ./inc/VZDCFData.h ./inc/VZDCFLinkDef.h
-	$(CXX) $(CXXFLAGS) -c -o $@ $(basename $@).cpp
-
 ###############################################################################################################################
 install:	all
-	@echo "MODELGEN install: see ./bin/ and ./lib/ directories"
+	@echo "causation install: see ./bin/ and ./lib/ directories"
 
 ###############################################################################################################################
 clean:
 	-rm -f ./obj/*.o ./obj/*_Dict.cpp ./obj/*_Dict.h 
 ###############################################################################################################################
 
-.PHONY: all clean install FORCEDISTDIR dist TESTHESSIO TESTFITS config
+.PHONY: all clean install FORCEDISTDIR 
